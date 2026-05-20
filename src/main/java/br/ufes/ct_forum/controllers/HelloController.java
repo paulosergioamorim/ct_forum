@@ -1,4 +1,4 @@
-package com.ufes.ct_forum.controllers;
+package br.ufes.ct_forum.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

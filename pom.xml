@@ -8,7 +8,7 @@
 		<version>4.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.ufes</groupId>
+	<groupId>br.ufes</groupId>
 	<artifactId>ct_forum</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>

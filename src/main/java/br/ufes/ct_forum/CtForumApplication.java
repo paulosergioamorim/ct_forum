@@ -1,4 +1,4 @@
-package com.ufes.ct_forum;
+package br.ufes.ct_forum;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
