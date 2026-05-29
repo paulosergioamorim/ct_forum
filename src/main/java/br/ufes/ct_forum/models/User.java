@@ -1,5 +1,6 @@
 package br.ufes.ct_forum.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +12,7 @@ public class User {
     private String name;
     private String email;
     @Column(name = "password_hash")
+    @JsonIgnore
     private String passwordHash;
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
@@ -23,6 +25,10 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getName() {
