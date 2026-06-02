@@ -26,19 +26,51 @@ public class UsersService {
         return usersRepository.findAll(page);
     }
 
+    public Optional<User> findById(long id) {
+        return usersRepository.findById(id);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return usersRepository.findByEmail(email);
+    }
+
     public User save(CreateUserDto dto) throws EmailAlreadyExists, PasswordsDoesNotMatch {
-        if (!Objects.equals(dto.password(), dto.passwordConfirm())) {
-            throw new PasswordsDoesNotMatch();
-        }
+        if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
 
         Optional<User> existingUser = usersRepository.findByEmail(dto.email());
 
-        if (existingUser.isPresent()) {
-            throw new EmailAlreadyExists();
-        }
+        if (existingUser.isPresent()) throw new EmailAlreadyExists();
 
         String passwordHash = passwordService.hash(dto.password());
         User user = new User(dto.name(), dto.email(), passwordHash, dto.role());
         return usersRepository.save(user);
+    }
+
+    public void update(long id, CreateUserDto dto) throws PasswordsDoesNotMatch, EmailAlreadyExists {
+        Optional<User> existingUser = usersRepository.findById(id);
+
+        if (existingUser.isEmpty()) return;
+
+        if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
+
+        Optional<User> existingUserByEmail = usersRepository.findByEmail(dto.email());
+
+        if (existingUserByEmail.isPresent()) throw new EmailAlreadyExists();
+
+        User user = existingUser.get(); // persistent entity
+
+        if (dto.password() != null) {
+            String passwordHash = passwordService.hash(dto.password());
+            user.setPasswordHash(passwordHash);
+        }
+        if (dto.name() != null) user.setName(dto.name());
+        if (dto.email() != null) user.setEmail(dto.email());
+        if (dto.role() != null) user.setRole(dto.role());
+
+        usersRepository.save(user);
+    }
+
+    public void delete(long id) {
+        usersRepository.deleteById(id);
     }
 }
