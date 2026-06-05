@@ -2,10 +2,8 @@ package br.ufes.ct_forum.models;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-public final class Comment extends Post {
+public class Comment extends Post {
     @Column(name = "parent_id")
     private Long parentId;
 
