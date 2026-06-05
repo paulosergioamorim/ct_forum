@@ -1,13 +1,15 @@
 package br.ufes.ct_forum.services;
 
 import br.ufes.ct_forum.dtos.CreateUserDto;
-import br.ufes.ct_forum.exception.EmailAlreadyExists;
-import br.ufes.ct_forum.exception.PasswordsDoesNotMatch;
+import br.ufes.ct_forum.exceptions.EmailAlreadyExists;
+import br.ufes.ct_forum.exceptions.NotFoundException;
+import br.ufes.ct_forum.exceptions.PasswordsDoesNotMatch;
 import br.ufes.ct_forum.models.User;
 import br.ufes.ct_forum.repositories.UsersRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -26,15 +28,15 @@ public class UsersService {
         return usersRepository.findAll(page);
     }
 
-    public Optional<User> findById(long id) {
-        return usersRepository.findById(id);
+    public User findById(long id) {
+        return usersRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
     }
 
-    public Optional<User> findByEmail(String email) {
-        return usersRepository.findByEmail(email);
+    public User findByEmail(String email) {
+        return usersRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Usuário com email " + email + " não encontrado"));
     }
 
-    public User save(CreateUserDto dto) throws EmailAlreadyExists, PasswordsDoesNotMatch {
+    public User save(CreateUserDto dto) {
         if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
 
         Optional<User> existingUser = usersRepository.findByEmail(dto.email());
@@ -46,31 +48,29 @@ public class UsersService {
         return usersRepository.save(user);
     }
 
-    public void update(long id, CreateUserDto dto) throws PasswordsDoesNotMatch, EmailAlreadyExists {
-        Optional<User> existingUser = usersRepository.findById(id);
+    @Transactional
+    public void updateById(long id, CreateUserDto dto) {
+        User user = usersRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
 
-        if (existingUser.isEmpty()) return;
-
-        if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
-
-        Optional<User> existingUserByEmail = usersRepository.findByEmail(dto.email());
-
-        if (existingUserByEmail.isPresent()) throw new EmailAlreadyExists();
-
-        User user = existingUser.get(); // persistent entity
+        if (dto.email() != null) {
+            usersRepository.findByEmail(dto.email()).ifPresent(found -> {
+                if (found.getId() != id) throw new EmailAlreadyExists();
+            });
+            user.setEmail(dto.email());
+        }
 
         if (dto.password() != null) {
-            String passwordHash = passwordService.hash(dto.password());
-            user.setPasswordHash(passwordHash);
+            if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
+            user.setPasswordHash(passwordService.hash(dto.password()));
         }
-        if (dto.name() != null) user.setName(dto.name());
-        if (dto.email() != null) user.setEmail(dto.email());
-        if (dto.role() != null) user.setRole(dto.role());
 
-        usersRepository.save(user);
+        if (dto.name() != null) user.setName(dto.name());
+        if (dto.role() != null) user.setRole(dto.role());
     }
 
-    public void delete(long id) {
+    public void deleteById(long id) {
+        if (!usersRepository.existsById(id)) throw new NotFoundException("Usuário com id " + id + " não encontrado");
+
         usersRepository.deleteById(id);
     }
 }

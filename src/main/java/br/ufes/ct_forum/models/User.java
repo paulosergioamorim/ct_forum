@@ -5,16 +5,19 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users", indexes = @Index(name = "user_email_index", columnList = "email", unique = true))
-public class User {
+public final class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String email;
-    @Column(name = "password_hash")
+    @Column(name = "password_hash", nullable = false)
     @JsonIgnore
     private String passwordHash;
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private UserRole role;
 
     public User() {

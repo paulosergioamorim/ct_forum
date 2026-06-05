@@ -1,21 +1,18 @@
 package br.ufes.ct_forum.controllers;
 
 import br.ufes.ct_forum.dtos.CreateUserDto;
-import br.ufes.ct_forum.exception.EmailAlreadyExists;
-import br.ufes.ct_forum.exception.PasswordsDoesNotMatch;
 import br.ufes.ct_forum.models.User;
 import br.ufes.ct_forum.services.UsersService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-
 @RestController
-@RequestMapping("/v1/users")
+@RequestMapping("/users")
 public class UsersController {
     private final UsersService usersService;
 
@@ -24,31 +21,30 @@ public class UsersController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<User>> findAll(Pageable page) {
+    public ResponseEntity<PagedModel<User>> findAll(@ParameterObject @PageableDefault(size = 50) Pageable page) {
         return ResponseEntity.ok(new PagedModel<>(usersService.findAll(page)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(long id) {
-        Optional<User> user = usersService.findById(id);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<User> findById(@PathVariable long id) {
+        return ResponseEntity.ok(usersService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<User> save(@RequestBody CreateUserDto dto) throws URISyntaxException, EmailAlreadyExists, PasswordsDoesNotMatch {
+    public ResponseEntity<User> save(@RequestBody CreateUserDto dto) {
         User user = usersService.save(dto);
-        return ResponseEntity.created(new URI("/v1/users/" + user.getId())).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> update(long id, @RequestBody CreateUserDto dto) throws EmailAlreadyExists, PasswordsDoesNotMatch {
-        usersService.update(id, dto);
+    public ResponseEntity<Void> update(@PathVariable long id, @RequestBody CreateUserDto dto) {
+        usersService.updateById(id, dto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(long id) {
-        usersService.delete(id);
+    public ResponseEntity<Void> deleteById(@PathVariable long id) {
+        usersService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 }
