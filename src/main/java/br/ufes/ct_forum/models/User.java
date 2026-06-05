@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users", indexes = @Index(name = "user_email_index", columnList = "email", unique = true))
-public final class User {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;

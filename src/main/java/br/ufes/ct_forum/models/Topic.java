@@ -6,10 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-
 @Entity
-public final class Topic extends Post {
+public class Topic extends Post {
     /*
     Devido ao uso de SINGLE_TABLE, esta coluna
     deve ser anulável no banco de dados, e deve
@@ -23,8 +21,8 @@ public final class Topic extends Post {
     public Topic() {
     }
 
-    public Topic(String content, LocalDateTime createdAt, LocalDateTime updatedAt, long authorId, String[] tags) {
-        super(content, createdAt, updatedAt, authorId);
+    public Topic(String content, long authorId, String[] tags) {
+        super(content, authorId);
         this.tags = tags;
     }
 
