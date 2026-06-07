@@ -15,23 +15,20 @@ public abstract class Post {
     private String content;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    @Column(name = "updated_at", nullable = true)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "author_id", nullable = false)
-    private long authorId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", insertable = false, updatable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
     public Post() {
     }
 
-    public Post(String content, long authorId) {
+    public Post(String content, User author) {
         this.content = content;
+        this.author = author;
         this.createdAt = LocalDateTime.now();
-        this.authorId = authorId;
     }
 
     @PreUpdate
@@ -70,14 +67,6 @@ public abstract class Post {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public long getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(long authorId) {
-        this.authorId = authorId;
     }
 
     public User getAuthor() {

@@ -10,24 +10,20 @@ public class Rating {
     private long id;
     @Column(name = "is_positive", nullable = false)
     private boolean isPositive;
-    @Column(name = "post_id", nullable = false)
-    private long postId;
-    @Column(name = "user_id", nullable = false)
-    private long userId;
     @ManyToOne
-    @JoinColumn(name = "post_id", updatable = false, insertable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
     @ManyToOne
-    @JoinColumn(name = "user_id", updatable = false, insertable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Rating() {
     }
 
-    public Rating(boolean isPositive, long postId, long userId) {
+    public Rating(boolean isPositive, Post post, User user) {
         this.isPositive = isPositive;
-        this.postId = postId;
-        this.userId = userId;
+        this.post = post;
+        this.user = user;
     }
 
     public User getUser() {

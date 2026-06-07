@@ -2,7 +2,6 @@ package br.ufes.ct_forum.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -13,17 +12,28 @@ public class Topic extends Post {
     deve ser anulável no banco de dados, e deve
     ser verificada como não nula apenas na aplicação
      */
-    @NotNull
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(columnDefinition = "text[]")
     private String[] tags;
 
+    @Column(nullable = false)
+    private String title;
+
     public Topic() {
     }
 
-    public Topic(String content, long authorId, String[] tags) {
-        super(content, authorId);
+    public Topic(String title, String content, User author, String[] tags) {
+        super(content, author);
+        this.title = title;
         this.tags = tags;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String[] getTags() {

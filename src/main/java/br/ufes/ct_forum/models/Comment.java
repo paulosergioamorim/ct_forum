@@ -4,23 +4,20 @@ import jakarta.persistence.*;
 
 @Entity
 public class Comment extends Post {
-    @Column(name = "parent_id")
-    private Long parentId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    @JoinColumn(name = "parent_id")
     private Comment parent;
 
     public Comment() {
     }
 
-    public Comment(String content, long authorId) {
-        super(content, authorId);
+    public Comment(String content, User author) {
+        super(content, author);
     }
 
-    public Comment(String content, long authorId, long parentId) {
-        super(content, authorId);
-        this.parentId = parentId;
+    public Comment(String content, User author, Comment parent) {
+        super(content, author);
+        this.parent = parent;
     }
 
     public Comment getParent() {
@@ -33,6 +30,6 @@ public class Comment extends Post {
 
     @Transient
     public boolean isRootComment() {
-        return parentId == null;
+        return parent == null;
     }
 }

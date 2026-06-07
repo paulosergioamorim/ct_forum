@@ -3,9 +3,10 @@ package br.ufes.ct_forum.services;
 import br.ufes.ct_forum.dtos.CreateUserDto;
 import br.ufes.ct_forum.exceptions.EmailAlreadyExists;
 import br.ufes.ct_forum.exceptions.NotFoundException;
-import br.ufes.ct_forum.exceptions.PasswordsDoesNotMatch;
+import br.ufes.ct_forum.exceptions.PasswordsDoNotMatch;
 import br.ufes.ct_forum.models.User;
 import br.ufes.ct_forum.repositories.UsersRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,8 @@ public class UsersService {
         return usersRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Usuário com email " + email + " não encontrado"));
     }
 
-    public User save(CreateUserDto dto) {
-        if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
+    public User save(@NonNull CreateUserDto dto) {
+        if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoNotMatch();
 
         Optional<User> existingUser = usersRepository.findByEmail(dto.email());
 
@@ -49,7 +50,7 @@ public class UsersService {
     }
 
     @Transactional
-    public void updateById(long id, CreateUserDto dto) {
+    public void updateById(long id, @NonNull CreateUserDto dto) {
         User user = usersRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
 
         if (dto.email() != null) {
@@ -60,7 +61,7 @@ public class UsersService {
         }
 
         if (dto.password() != null) {
-            if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoesNotMatch();
+            if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoNotMatch();
             user.setPasswordHash(passwordService.hash(dto.password()));
         }
 

@@ -3,7 +3,7 @@ package br.ufes.ct_forum.controllers;
 import br.ufes.ct_forum.dtos.ErrorDto;
 import br.ufes.ct_forum.exceptions.EmailAlreadyExists;
 import br.ufes.ct_forum.exceptions.NotFoundException;
-import br.ufes.ct_forum.exceptions.PasswordsDoesNotMatch;
+import br.ufes.ct_forum.exceptions.PasswordsDoNotMatch;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({EmailAlreadyExists.class, PasswordsDoesNotMatch.class})
+    @ExceptionHandler({EmailAlreadyExists.class, PasswordsDoNotMatch.class})
     public ResponseEntity<ErrorDto> handleBadRequestException(RuntimeException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDto.of(HttpStatus.BAD_REQUEST, ex.getMessage(), request));
     }
