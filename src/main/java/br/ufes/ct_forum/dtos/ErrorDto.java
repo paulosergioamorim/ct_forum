@@ -6,6 +6,14 @@ import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
+/**
+ * DTO padronizado para estruturar as respostas de erro da API.
+ *
+ * @param timestamp O momento exato em que o erro ocorreu.
+ * @param status    O código de status HTTP correspondente (ex: 404, 400).
+ * @param error     A mensagem detalhada descrevendo a causa do erro.
+ * @param path      endpoint que foi acessado no momento da falha.
+ */
 @Schema(description = "Erro do sistema")
 public record ErrorDto(
         @Schema(description = "Timestamp atual", example = "2026-06-07T13:46:13.162686926Z") Instant timestamp,
