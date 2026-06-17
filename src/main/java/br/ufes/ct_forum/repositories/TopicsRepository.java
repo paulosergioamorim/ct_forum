@@ -8,10 +8,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Repositório para operações de persistência específicas da entidade {@link Topic}.
+ */
 @Repository
 public interface TopicsRepository extends JpaRepository<Topic, Long> {
+    /**
+     * Busca de forma paginada todos os tópicos iniciados por um usuário específico.
+     *
+     * @param authorId O ID do usuário criador do tópico.
+     * @param pageable Configurações da página.
+     * @return Um objeto {@link Page} contendo os tópicos encontrados.
+     */
     Page<Topic> findByAuthorId(long authorId, Pageable pageable);
 
+    /**
+     * Realiza uma busca paginada por tópicos que contenham uma tag específica 
+     * em seu array de tags.
+
+     * @param tag      A tag em formato de texto a ser procurada no array.
+     * @param pageable Configurações de limite, deslocamento e ordenação da página.
+     * @return Um objeto {@link Page} contendo os tópicos que possuem a tag.
+     */
     @Query(value = "select * from posts where :tag = any(tags)", nativeQuery = true)
     Page<Topic> findByTag(@Param("tag") String tag, Pageable pageable);
 }

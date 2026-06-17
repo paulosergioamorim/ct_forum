@@ -4,6 +4,13 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidade base que representa uma publicação no fórum.
+ * <p>
+ * Classe abstrata que serve como base para os tipos específicos
+ * de publicações (Tópicos e Comentários).
+ * </p>
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "posts")
@@ -15,35 +22,59 @@ public abstract class Post {
     private String content;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    @Column(name = "updated_at", nullable = true)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "author_id", nullable = false)
-    private long authorId;
-
+    /**
+     * O autor da publicação. 
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", insertable = false, updatable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+   /**
+     * Construtor padrão sem argumentos, exigido pela especificação da JPA.
+     */ 
     public Post() {
     }
 
-    public Post(String content, long authorId) {
+    /**
+     * Cria uma nova publicação.
+     * A data de criação ({@code createdAt}) é inicializada automaticamente 
+     * no momento da instanciação.
+     *
+     * @param content O conteúdo em texto da publicação.
+     * @param author  O usuário criador da publicação.
+     */
+    public Post(String content, User author) {
         this.content = content;
+        this.author = author;
         this.createdAt = LocalDateTime.now();
-        this.authorId = authorId;
     }
 
+    /**
+     * Callback do JPA.
+     * Executado antes de um UPDATE ser enviado para o banco de dados.
+     */
     @PreUpdate
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Verifica se a publicação sofreu alguma edição desde que foi criada.
+     * A anotação {@code @Transient} informa à que este método é apenas uma
+     * regra de negócio em memória e não corresponde a um atributo da classe.
+     *
+     * @return {@code true} se a data de atualização não for nula (ou seja, se o post foi editado),
+     * {@code false} caso contrário.
+     */
     @Transient
     public boolean isEdited() {
         return updatedAt != null;
     }
 
+    // --- Getters e Setters (omitidos do javadoc por serem autoexplicativos) ---
     public long getId() {
         return id;
     }
@@ -70,14 +101,6 @@ public abstract class Post {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public long getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(long authorId) {
-        this.authorId = authorId;
     }
 
     public User getAuthor() {
