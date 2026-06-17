@@ -19,15 +19,30 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+/**
+ * Controlador REST responsável por expor os endpoints de gerenciamento de usuários.
+ */
 @RestController
 @RequestMapping("/users")
 public class UsersController {
     private final UsersService usersService;
 
+    /**
+     * Construtor para injeção de dependência do serviço de usuários.
+     *
+     * @param usersService O serviço contendo a lógica de negócios de usuários.
+     */
     public UsersController(UsersService usersService) {
         this.usersService = usersService;
     }
 
+    /**
+     * Recupera uma lista paginada de todos os usuários registrados.
+     *
+     * @param page Objeto embutido pela requisição contendo parâmetros de paginação.
+     * @return Resposta HTTP 200 contendo o modelo paginado de {@link UserDto}.
+     */
     @GetMapping
     @Operation(summary = "Busca os usuários do sistema por paginação")
     @ApiResponse(description = "Sucesso", responseCode = "200")
@@ -37,6 +52,12 @@ public class UsersController {
         return ResponseEntity.ok(model);
     }
 
+    /**
+     * Recupera os dados de um usuário específico a partir de sua chave primária.
+     *
+     * @param id O identificador do usuário passado no caminho da URL.
+     * @return Resposta HTTP 200 contendo o {@link UserDto}, ou 404 caso não exista.
+     */
     @GetMapping("/{id}")
     @Operation(summary = "Busca um usuário pelo ID")
     @ApiResponses({
@@ -48,6 +69,12 @@ public class UsersController {
         return ResponseEntity.ok(dto);
     }
 
+    /**
+     * Cria uma nova conta de usuário no sistema.
+     *
+     * @param dto O corpo da requisição mapeado para {@link CreateUserDto}.
+     * @return Resposta HTTP 201 (Created) com os dados públicos do usuário criado.
+     */
     @PostMapping
     @Operation(summary = "Cria um usuário")
     @ApiResponses({
@@ -60,6 +87,13 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDto.of(user));
     }
 
+    /**
+     * Atualiza parcialmente os dados de um usuário existente.
+     *
+     * @param id  O identificador do usuário a ser alterado.
+     * @param dto Os novos dados a serem aplicados.
+     * @return Resposta HTTP 200 (OK) vazia em caso de sucesso.
+     */
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza parcialmente um usuário pelo ID")
     @ApiResponses({
@@ -73,6 +107,12 @@ public class UsersController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Remove fisicamente um usuário do sistema.
+     *
+     * @param id O identificador do usuário a ser deletado.
+     * @return Resposta HTTP 200 (OK) vazia em caso de sucesso.
+     */
     @DeleteMapping("/{id}")
     @Operation(summary = "Deleta um usuário pelo ID")
     @ApiResponses({
