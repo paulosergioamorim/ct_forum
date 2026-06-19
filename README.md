@@ -86,3 +86,6 @@ A raiz da documentação se encontra em `/target/reports/apidocs/index.html`
 - Essa documentação tem como foco os controladores e a interface com os consumidores
 da API
 
+#### 5. Diagrama de classes do domínio
+
+![Diagrama de Classes](./docs/class_diagram.png)
