@@ -11,7 +11,11 @@
 O `ct_forum` visa desenvolver uma plataforma
 para alunos do Centro Tecnológico da Universidade
 Federal do Espírito Santo interagirem numa plataforma
-centralizada
+centralizada.
+
+A modelagem do domínio pode ser vista no seguinte diagrama de classes:
+
+[logo]: https://github.com/paulosergioamorim/ct-forum/tree/docs-class-diagram/docs/class_diagram.png "Diagrama de classes"
 
 ### 2. Tecnologias
 - Spring Boot
