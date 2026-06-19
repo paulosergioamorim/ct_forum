@@ -15,7 +15,7 @@ centralizada.
 
 A modelagem do domínio pode ser vista no seguinte diagrama de classes:
 
-[diagrama de classes]: (https://github.com/paulosergioamorim/ct_forum/blob/docs-class-diagram/docs/class_diagram.png?raw=true)
+![Diagrama de Classes](./docs/class_diagram.png)
 
 ### 2. Tecnologias
 - Spring Boot
@@ -85,7 +85,3 @@ A raiz da documentação se encontra em `/target/reports/apidocs/index.html`
 - Acesse o endpoint `/swagger-ui.html`
 - Essa documentação tem como foco os controladores e a interface com os consumidores
 da API
-
-### 5. Diagrama de classes do domínio
-
-![Diagrama de Classes](./docs/class_diagram.png)
