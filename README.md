@@ -59,7 +59,7 @@ definido, o código falhará em compilar.
 #### 3.4 Executar o sistema
 
 ```shell
-java -jar ct_forum-<version>.jar
+java -jar target/ct_forum-<version>.jar
 ```
 
 Por padrão, a web api executa em `localhost:8080`
