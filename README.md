@@ -15,7 +15,7 @@ centralizada.
 
 A modelagem do domínio pode ser vista no seguinte diagrama de classes:
 
-[diagrama de classes]: https://github.com/paulosergioamorim/ct_forum/blob/docs-class-diagram/docs/class_diagram.png "Diagrama de classes"
+[diagrama de classes]: (https://github.com/paulosergioamorim/ct_forum/blob/docs-class-diagram/docs/class_diagram.png?raw=true)
 
 ### 2. Tecnologias
 - Spring Boot
