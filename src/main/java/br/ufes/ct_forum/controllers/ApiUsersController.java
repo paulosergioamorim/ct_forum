@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.*;
  * Controlador REST responsável por expor os endpoints de gerenciamento de usuários.
  */
 @RestController
-@RequestMapping("/users")
-public class UsersController {
+@RequestMapping("/api/users")
+public class ApiUsersController {
     private final UsersService usersService;
 
     /**
@@ -33,7 +33,7 @@ public class UsersController {
      *
      * @param usersService O serviço contendo a lógica de negócios de usuários.
      */
-    public UsersController(UsersService usersService) {
+    public ApiUsersController(UsersService usersService) {
         this.usersService = usersService;
     }
 

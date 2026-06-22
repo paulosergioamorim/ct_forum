@@ -21,16 +21,16 @@ import java.util.Optional;
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
-    private final PasswordService passwordService;
+    private final Argon2PasswordEncoder passwordEncoder;
 
     /**
      * Construtor da classe com Injeção de Dependências.
      * * @param usersRepository Repositório para operações de I/O na tabela de usuários.
-     * @param passwordService Serviço isolado para o hash seguro de credenciais.
+     * @param passwordEncoder Serviço isolado para o hash seguro de credenciais.
      */
-    public UsersService(UsersRepository usersRepository, PasswordService passwordService) {
+    public UsersService(UsersRepository usersRepository, Argon2PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
-        this.passwordService = passwordService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -86,7 +86,7 @@ public class UsersService {
 
         if (existingUser.isPresent()) throw new EmailAlreadyExists();
 
-        String passwordHash = passwordService.hash(dto.password());
+        String passwordHash = passwordEncoder.encode(dto.password());
         User user = new User(dto.name(), dto.email(), passwordHash, dto.role());
         return usersRepository.save(user);
     }
@@ -118,7 +118,7 @@ public class UsersService {
 
         if (dto.password() != null) {
             if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoNotMatch();
-            user.setPasswordHash(passwordService.hash(dto.password()));
+            user.setPasswordHash(passwordEncoder.encode(dto.password()));
         }
 
         if (dto.name() != null) user.setName(dto.name());
