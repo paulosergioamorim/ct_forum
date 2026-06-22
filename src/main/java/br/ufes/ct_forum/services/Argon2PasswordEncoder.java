@@ -15,7 +15,7 @@ public class Argon2PasswordEncoder implements PasswordEncoder {
             65536,  // memory (KB) — 64MB
             3,      // iterations
             2,      // parallelism
-            128,    // output length (bits)
+            64,    // output length (bits)
             Argon2.ID
     );
 

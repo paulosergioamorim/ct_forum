@@ -122,7 +122,6 @@ public class UsersService {
         }
 
         if (dto.name() != null) user.setName(dto.name());
-        if (dto.role() != null) user.setRole(dto.role());
     }
 
     /**

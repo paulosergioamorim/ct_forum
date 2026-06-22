@@ -1,37 +1,107 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 <head>
-    <title>Ct Forum - Login</title>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - CT Forum</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <style>
+        body {
+            background-color: #e9ecef;
+        }
+
+        .register-card {
+            background-color: #e9ecef;
+            max-width: 420px;
+        }
+
+        .btn-register {
+            background-color: #3d8b3d;
+            border: none;
+            color: #fff;
+        }
+
+        .btn-register:hover {
+            background-color: #2e6b2e;
+            color: #fff;
+        }
+
+        footer {
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
 </head>
-<body>
-<form th:action="@{/login}" method="post">
+<body class="d-flex flex-column min-vh-100">
 
-    <div th:if="${param.error}">
-        <span>Invalid username or password.</span>
+<nav class="navbar navbar-dark bg-dark px-4">
+    <a class="navbar-brand fw-bold text-white" th:href="@{/}">CT Forum</a>
+    <div class="d-flex gap-2 ms-auto">
+        <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                </span>
+            <input type="text" class="form-control bg-dark border-secondary text-white" placeholder="Pesquisar" style="min-width: 220px;" />
+        </div>
+        <a th:href="@{/login}" class="btn btn-outline-light btn-sm">Login</a>
+        <a th:href="@{/profile}" class="btn btn-primary btn-sm">Perfil</a>
     </div>
+</nav>
 
-    <div th:if="${param.logout}">
-        <span>You have been logged out.</span>
+<main class="flex-grow-1 d-flex align-items-start justify-content-center pt-5">
+    <div class="register-card w-100 px-3">
+        <h2 class="mb-4 fw-normal">Cadastro</h2>
+
+        <div th:if="${error}" class="alert alert-danger py-2" th:text="${error}"></div>
+
+        <form th:action="@{/register}" method="post">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Digite seu nome" />
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Digite seu email" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Digite sua senha" />
+            </div>
+
+            <div class="mb-3">
+                <label for="passwordConfirm" class="form-label">Confirmar Senha</label>
+                <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" placeholder="Confirme sua senha" />
+            </div>
+
+            <button type="submit" class="btn btn-register w-100 mb-3">Cadastrar</button>
+
+            <div class="text-center small">
+                <p class="mb-0">
+                    Já tem uma conta?
+                    <a th:href="@{/login}" class="text-dark">Faça login aqui.</a>
+                </p>
+            </div>
+
+        </form>
     </div>
+</main>
 
-    <div>
-        <label>
-            Email
-            <input type="text" name="email"/>
-        </label>
+<footer class="py-3 mt-4">
+    <div class="container d-flex justify-content-between align-items-center text-muted small">
+        <span>© 2026 CT Forum</span>
+        <a th:href="@{/about}" class="text-muted text-decoration-none">About</a>
+        <a href="https://github.com" class="text-muted text-decoration-none d-flex align-items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+            </svg>
+            GitHub
+        </a>
     </div>
+</footer>
 
-    <div>
-        <label>
-            Senha
-            <input type="password" name="password"/>
-        </label>
-    </div>
-
-    <button type="submit">Login</button>
-    <a th:href="@{/register}">Create account</a>
-
-</form>
 </body>
 </html>
