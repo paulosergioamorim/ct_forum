@@ -1,12 +1,7 @@
 package br.ufes.ct_forum.config;
 
-import br.ufes.ct_forum.services.Argon2PasswordEncoder;
-import br.ufes.ct_forum.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,14 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final UserDetailsServiceImpl userDetailsService;
-    private final Argon2PasswordEncoder argon2PasswordEncoder;
-
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, Argon2PasswordEncoder argon2PasswordEncoder) {
-        this.userDetailsService = userDetailsService;
-        this.argon2PasswordEncoder = argon2PasswordEncoder;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/v3/api-docs/**", "/swagger-ui/**"))
@@ -41,7 +28,8 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/home", true)
+                        .usernameParameter("email")
+                        .defaultSuccessUrl("/feed", true)
                         .failureUrl("/login?error")
                         .permitAll()
                 )
@@ -56,12 +44,5 @@ public class SecurityConfig {
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(argon2PasswordEncoder);
-        return new ProviderManager(provider);
     }
 }
