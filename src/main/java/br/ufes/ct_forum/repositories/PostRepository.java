@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
  * </p>
  */
 @Repository
-public interface PostsRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long> {
     /**
      * Busca o histórico de publicações de um usuário, retornando de forma 
      * paginada.

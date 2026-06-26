@@ -10,7 +10,7 @@ import java.util.Optional;
  * Repositório para operações de persistência da entidade {@link User}.
  */
 @Repository
-public interface UsersRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Busca um usuário baseando-se estritamente no seu endereço de e-mail.
      *

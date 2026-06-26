@@ -16,7 +16,7 @@ import java.util.Optional;
  * </p>
  */
 @Repository
-public interface RatingsRepository extends JpaRepository<Rating, Long> {
+public interface RatingRepository extends JpaRepository<Rating, Long> {
     /**
      * Busca uma avaliação específica cruzando os identificadores da publicação e do usuário.
      *

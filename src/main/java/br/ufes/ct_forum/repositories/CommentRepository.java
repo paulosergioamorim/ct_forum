@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * </p>
  */
 @Repository
-public interface CommentsRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Busca todos os comentários feitos por um usuário específico, retornando
      * os resultados em lotes (paginados).
