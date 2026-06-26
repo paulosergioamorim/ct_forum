@@ -20,9 +20,13 @@ public class Comment extends Post {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private Topic topic;
+
     /**
      * Construtor padrão sem argumentos, exigido pela especificação da JPA.
-     */ 
+     */
     public Comment() {
     }
 
@@ -32,10 +36,11 @@ public class Comment extends Post {
      *
      * @param content O conteúdo em texto do comentário.
      * @param author  O usuário que está comentando.
+     * @param topic   O tópico onde o comentário está sendo feito.
      */
-    public Comment(String content, User author) {
-        // Aqui não precisa de nada indicando o post relacionado não ??
+    public Comment(String content, User author, Topic topic) {
         super(content, author);
+        this.topic = topic;
     }
 
     /**
@@ -48,6 +53,7 @@ public class Comment extends Post {
     public Comment(String content, User author, Comment parent) {
         super(content, author);
         this.parent = parent;
+        this.topic = parent.topic;
     }
 
     // --- Getters e Setters (omitidos do javadoc por serem autoexplicativos) ---
@@ -57,6 +63,14 @@ public class Comment extends Post {
 
     public void setParent(Comment parent) {
         this.parent = parent;
+    }
+
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
     /**
