@@ -25,6 +25,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByAuthorId(long authorId, Pageable pageable);
 
     /**
+     * Conta todos os comentários de um tópico
+     * @param topicId O ID do tópico
+     * @return quantidade de comentários feitos no tópico
+     */
+    long countByTopicId(long topicId);
+
+    /**
      * Busca todas as respostas diretas (comentários filhos) de um comentário específico,
      * de forma paginada.
      * 

@@ -77,6 +77,14 @@ public class Rating {
         return post;
     }
 
+    public boolean isPositive() {
+        return isPositive;
+    }
+
+    public void setPositive(boolean positive) {
+        isPositive = positive;
+    }
+
     public void setPost(Post post) {
         this.post = post;
     }

@@ -1,11 +1,15 @@
 package br.ufes.ct_forum.services;
 
 import br.ufes.ct_forum.dtos.CreateTopicDto;
+import br.ufes.ct_forum.dtos.TopicFeedDto;
 import br.ufes.ct_forum.exceptions.NotFoundException;
 import br.ufes.ct_forum.models.Topic;
 import br.ufes.ct_forum.models.User;
+import br.ufes.ct_forum.repositories.CommentRepository;
 import br.ufes.ct_forum.repositories.TopicRepository;
 import org.jspecify.annotations.NonNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TopicService {
     private final TopicRepository topicRepository;
     private final UserService userService;
+    private final CommentRepository commentRepository;
 
     /**
      * Construtor da classe com Injeção de Dependências.
@@ -25,9 +30,10 @@ public class TopicService {
      * @param topicRepository Repositório para operações de I/O na tabela de tópicos.
      * @param userService     Serviço de domínio de usuários para recuperação de dados de autoria.
      */
-    public TopicService(TopicRepository topicRepository, UserService userService) {
+    public TopicService(TopicRepository topicRepository, UserService userService, CommentRepository commentRepository) {
         this.topicRepository = topicRepository;
         this.userService = userService;
+        this.commentRepository = commentRepository;
     }
 
     /**
@@ -53,6 +59,30 @@ public class TopicService {
     }
 
     /**
+     * Retorna a lista paginada já mapeada para o DTO de visualização,
+     * garantindo a resolução segura de proxies LAZY e agragando contagens.
+     */
+    @Transactional(readOnly = true)
+    @Cacheable(value = "feedCache", key = "#page")
+    public Page<TopicFeedDto> findAllForFeed(Pageable page) {
+        Page<Topic> topics = topicRepository.findAll(page);
+
+        return topics.map(topic -> {
+            long commentCount = commentRepository.countByTopicId(topic.getId());
+
+            return new TopicFeedDto(
+                    topic.getId(),
+                    topic.getTitle(),
+                    topic.getAuthor().getName(),
+                    topic.getCreatedAt(),
+                    topic.getUpdatedAt(),
+                    topic.isEdited(),
+                    commentCount
+            );
+        });
+    }
+
+    /**
      * Realiza uma busca paginada por tópicos que contenham uma tag específica.
      *
      * @param tag  A tag em formato de texto a ser procurada.
@@ -75,6 +105,7 @@ public class TopicService {
      * @return A entidade {@link Topic} recém-criada e persistida (com ID preenchido).
      * @throws NotFoundException Se o usuário fornecido como autor não existir.
      */
+    @CacheEvict(value = "feedCache", allEntries = true)
     public Topic save(@NonNull CreateTopicDto dto) {
         User author = userService.findById(dto.authorId());
         Topic topic = new Topic(dto.title(), dto.content(), author, dto.tags());
@@ -92,6 +123,7 @@ public class TopicService {
      * @throws NotFoundException Se o tópico a ser atualizado não existir.
      */
     @Transactional
+    @CacheEvict(value = "feedCache", allEntries = true)
     public void updateById(long id, @NonNull CreateTopicDto dto) {
         Topic topic = findById(id);
 
@@ -108,6 +140,7 @@ public class TopicService {
      * @param id O identificador do tópico a ser removido.
      * @throws NotFoundException Se o ID fornecido não existir previamente.
      */
+    @CacheEvict(value = "feedCache", allEntries = true)
     public void deleteById(long id) {
         if (!topicRepository.existsById(id)) {
             throw new NotFoundException("Tópico com id " + id + " não encontrado");
