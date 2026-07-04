@@ -63,7 +63,6 @@ public class TopicService {
      * garantindo a resolução segura de proxies LAZY e agragando contagens.
      */
     @Transactional(readOnly = true)
-    @Cacheable(value = "feedCache", key = "#page")
     public Page<TopicFeedDto> findAllForFeed(Pageable page) {
         Page<Topic> topics = topicRepository.findAll(page);
 
@@ -105,7 +104,6 @@ public class TopicService {
      * @return A entidade {@link Topic} recém-criada e persistida (com ID preenchido).
      * @throws NotFoundException Se o usuário fornecido como autor não existir.
      */
-    @CacheEvict(value = "feedCache", allEntries = true)
     public Topic save(@NonNull CreateTopicDto dto) {
         User author = userService.findById(dto.authorId());
         Topic topic = new Topic(dto.title(), dto.content(), author, dto.tags());
@@ -123,7 +121,6 @@ public class TopicService {
      * @throws NotFoundException Se o tópico a ser atualizado não existir.
      */
     @Transactional
-    @CacheEvict(value = "feedCache", allEntries = true)
     public void updateById(long id, @NonNull CreateTopicDto dto) {
         Topic topic = findById(id);
 
@@ -140,7 +137,6 @@ public class TopicService {
      * @param id O identificador do tópico a ser removido.
      * @throws NotFoundException Se o ID fornecido não existir previamente.
      */
-    @CacheEvict(value = "feedCache", allEntries = true)
     public void deleteById(long id) {
         if (!topicRepository.existsById(id)) {
             throw new NotFoundException("Tópico com id " + id + " não encontrado");
