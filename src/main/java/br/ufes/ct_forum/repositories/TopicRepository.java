@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * Repositório para operações de persistência específicas da entidade {@link Topic}.
  */
 @Repository
-public interface TopicsRepository extends JpaRepository<Topic, Long> {
+public interface TopicRepository extends JpaRepository<Topic, Long> {
     /**
      * Busca de forma paginada todos os tópicos iniciados por um usuário específico.
      *

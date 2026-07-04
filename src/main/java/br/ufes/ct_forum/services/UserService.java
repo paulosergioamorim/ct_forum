@@ -5,7 +5,7 @@ import br.ufes.ct_forum.exceptions.EmailAlreadyExists;
 import br.ufes.ct_forum.exceptions.NotFoundException;
 import br.ufes.ct_forum.exceptions.PasswordsDoNotMatch;
 import br.ufes.ct_forum.models.User;
-import br.ufes.ct_forum.repositories.UsersRepository;
+import br.ufes.ct_forum.repositories.UserRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +19,18 @@ import java.util.Optional;
  * Serviço responsável por concentrar a lógica de negócio relacionada aos Usuários.
  */
 @Service
-public class UsersService {
-    private final UsersRepository usersRepository;
-    private final PasswordService passwordService;
+public class UserService {
+    private final UserRepository userRepository;
+    private final Argon2PasswordEncoder passwordEncoder;
 
     /**
      * Construtor da classe com Injeção de Dependências.
      * * @param usersRepository Repositório para operações de I/O na tabela de usuários.
-     * @param passwordService Serviço isolado para o hash seguro de credenciais.
+     * @param passwordEncoder Serviço isolado para o hash seguro de credenciais.
      */
-    public UsersService(UsersRepository usersRepository, PasswordService passwordService) {
-        this.usersRepository = usersRepository;
-        this.passwordService = passwordService;
+    public UserService(UserRepository userRepository, Argon2PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -41,7 +41,7 @@ public class UsersService {
      * metadados.
      */
     public Page<User> findAll(Pageable page) {
-        return usersRepository.findAll(page);
+        return userRepository.findAll(page);
     }
 
     /**
@@ -52,7 +52,7 @@ public class UsersService {
      * @throws NotFoundException Se nenhum usuário possuir o ID fornecido.
      */
     public User findById(long id) {
-        return usersRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
     }
 
     /**
@@ -63,7 +63,7 @@ public class UsersService {
      * @throws NotFoundException Se o e-mail não estiver registrado no sistema.
      */
     public User findByEmail(String email) {
-        return usersRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Usuário com email " + email + " não encontrado"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Usuário com email " + email + " não encontrado"));
     }
 
     /**
@@ -82,13 +82,13 @@ public class UsersService {
     public User save(@NonNull CreateUserDto dto) {
         if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoNotMatch();
 
-        Optional<User> existingUser = usersRepository.findByEmail(dto.email());
+        Optional<User> existingUser = userRepository.findByEmail(dto.email());
 
         if (existingUser.isPresent()) throw new EmailAlreadyExists();
 
-        String passwordHash = passwordService.hash(dto.password());
+        String passwordHash = passwordEncoder.encode(dto.password());
         User user = new User(dto.name(), dto.email(), passwordHash, dto.role());
-        return usersRepository.save(user);
+        return userRepository.save(user);
     }
 
     /**
@@ -107,10 +107,10 @@ public class UsersService {
      */
     @Transactional
     public void updateById(long id, @NonNull CreateUserDto dto) {
-        User user = usersRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuário com id " + id + " não encontrado"));
 
         if (dto.email() != null) {
-            usersRepository.findByEmail(dto.email()).ifPresent(found -> {
+            userRepository.findByEmail(dto.email()).ifPresent(found -> {
                 if (found.getId() != id) throw new EmailAlreadyExists();
             });
             user.setEmail(dto.email());
@@ -118,11 +118,10 @@ public class UsersService {
 
         if (dto.password() != null) {
             if (!Objects.equals(dto.password(), dto.passwordConfirm())) throw new PasswordsDoNotMatch();
-            user.setPasswordHash(passwordService.hash(dto.password()));
+            user.setPasswordHash(passwordEncoder.encode(dto.password()));
         }
 
         if (dto.name() != null) user.setName(dto.name());
-        if (dto.role() != null) user.setRole(dto.role());
     }
 
     /**
@@ -132,8 +131,8 @@ public class UsersService {
      * @throws NotFoundException Se o ID fornecido não existir previamente.
      */
     public void deleteById(long id) {
-        if (!usersRepository.existsById(id)) throw new NotFoundException("Usuário com id " + id + " não encontrado");
+        if (!userRepository.existsById(id)) throw new NotFoundException("Usuário com id " + id + " não encontrado");
 
-        usersRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 }

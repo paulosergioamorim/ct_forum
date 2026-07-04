@@ -4,7 +4,7 @@ import br.ufes.ct_forum.dtos.CreateUserDto;
 import br.ufes.ct_forum.dtos.ErrorDto;
 import br.ufes.ct_forum.dtos.UserDto;
 import br.ufes.ct_forum.models.User;
-import br.ufes.ct_forum.services.UsersService;
+import br.ufes.ct_forum.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,17 +24,17 @@ import org.springframework.web.bind.annotation.*;
  * Controlador REST responsável por expor os endpoints de gerenciamento de usuários.
  */
 @RestController
-@RequestMapping("/users")
-public class UsersController {
-    private final UsersService usersService;
+@RequestMapping("/api/users")
+public class ApiUserController {
+    private final UserService userService;
 
     /**
      * Construtor para injeção de dependência do serviço de usuários.
      *
-     * @param usersService O serviço contendo a lógica de negócios de usuários.
+     * @param userService O serviço contendo a lógica de negócios de usuários.
      */
-    public UsersController(UsersService usersService) {
-        this.usersService = usersService;
+    public ApiUserController(UserService userService) {
+        this.userService = userService;
     }
 
     /**
@@ -47,7 +47,7 @@ public class UsersController {
     @Operation(summary = "Busca os usuários do sistema por paginação")
     @ApiResponse(description = "Sucesso", responseCode = "200")
     public ResponseEntity<PagedModel<UserDto>> findAll(@ParameterObject @PageableDefault(size = 50) Pageable page) {
-        Page<User> users = usersService.findAll(page);
+        Page<User> users = userService.findAll(page);
         PagedModel<UserDto> model = new PagedModel<>(users.map(UserDto::of));
         return ResponseEntity.ok(model);
     }
@@ -65,7 +65,7 @@ public class UsersController {
             @ApiResponse(description = "Não encontrado", responseCode = "404")
     })
     public ResponseEntity<UserDto> findById(@PathVariable long id) {
-        UserDto dto = UserDto.of(usersService.findById(id));
+        UserDto dto = UserDto.of(userService.findById(id));
         return ResponseEntity.ok(dto);
     }
 
@@ -83,7 +83,7 @@ public class UsersController {
             @ApiResponse(description = "Senhas não coincidem", responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorDto.class)))
     })
     public ResponseEntity<UserDto> save(@RequestBody CreateUserDto dto) {
-        User user = usersService.save(dto);
+        User user = userService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDto.of(user));
     }
 
@@ -103,7 +103,7 @@ public class UsersController {
             @ApiResponse(description = "Senhas não coincidem", responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorDto.class)))
     })
     public ResponseEntity<Void> update(@PathVariable long id, @RequestBody CreateUserDto dto) {
-        usersService.updateById(id, dto);
+        userService.updateById(id, dto);
         return ResponseEntity.ok().build();
     }
 
@@ -120,7 +120,7 @@ public class UsersController {
             @ApiResponse(description = "Não encontrado", responseCode = "404")
     })
     public ResponseEntity<Void> deleteById(@PathVariable long id) {
-        usersService.deleteById(id);
+        userService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 }

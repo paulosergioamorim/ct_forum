@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * </p>
  */
 @Repository
-public interface CommentsRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Busca todos os comentários feitos por um usuário específico, retornando
      * os resultados em lotes (paginados).
@@ -23,6 +23,13 @@ public interface CommentsRepository extends JpaRepository<Comment, Long> {
      * @return Um objeto {@link Page} contendo a lista de comentários da página e os metadados.
      */
     Page<Comment> findByAuthorId(long authorId, Pageable pageable);
+
+    /**
+     * Conta todos os comentários de um tópico
+     * @param topicId O ID do tópico
+     * @return quantidade de comentários feitos no tópico
+     */
+    long countByTopicId(long topicId);
 
     /**
      * Busca todas as respostas diretas (comentários filhos) de um comentário específico,
