@@ -85,3 +85,49 @@ A raiz da documentação se encontra em `/target/reports/apidocs/index.html`
 - Acesse o endpoint `/swagger-ui.html`
 - Essa documentação tem como foco os controladores e a interface com os consumidores
 da API
+
+### 5. Docker (via Docker Compose)
+
+Seção destinada a subir a infraestrutura com Docker Compose. Para utilizar o docker compose,
+seu .env deve conter também estas variáveis de ambiente (além das definidas previamente):
+
+```text
+POSTGRES_PASSWORD=
+POSTGRES_USER=
+POSTGRES_DB=
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_DEFAULT_PASSWORD=
+```
+
+`POSTGRES_PASSWORD`, `POSTGRES_USER`, `POSTGRES_DB` devem estar em consonância com as variáveis
+da aplicação Spring Boot definidas previamente. Certifique-se de ter o Docker e o Docker Compose
+instalados. `PGADMIN_DEFAULT_EMAIL` e `PGADMIN_DEFAULT_PASSWORD` serão o login no container do
+pgAdmin.
+
+1. Primeiro, empacote o código-fonte (seção 3.1).
+2. Em seguida, execute este comando para subir a infraestrutura:
+
+```shell
+docker compose up -d
+```
+
+Em uma API mais antiga:
+
+```shell
+docker-compose up -d
+```
+
+- `-d` indica que os containers serão executados em background.
+
+Para verificar o status dos containers, execute este comando:
+
+```shell
+docker compose ps
+```
+
+Em uma API mais antiga:
+
+```shell
+docker-compose ps
+```
+

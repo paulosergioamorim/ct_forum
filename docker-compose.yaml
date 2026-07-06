@@ -1,0 +1,32 @@
+services:
+  db:
+    container_name: db
+    image: "postgres:18-alpine"
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+    - pgvolume:/var/lib/postgresql/18/docker
+  pgadmin:
+    container_name: pgadmin
+    image: "dpage/pgadmin4:8.4"
+    env_file:
+      - .env
+    ports:
+      - "8081:80"
+      - "8082:443"
+  webapp:
+    container_name: webapp
+    depends_on:
+      - db
+    restart: on-failure
+    build: .
+    volumes:
+      - .env:/app/.env
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgvolume:
