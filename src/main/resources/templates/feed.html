@@ -32,7 +32,9 @@
 
         <!-- Lista de Tópicos -->
         <th:block th:each="topic : ${topics.content}">
-            <div th:replace="~{fragments :: topicCard(topic=${topic})}"></div>
+            <a th:href="@{/topic/{id}(id=${topic.id()})}" class="d-block text-decoration-none text-reset">
+                <div th:replace="~{fragments :: topicCard(topic=${topic})}"></div>
+            </a>
         </th:block>
 
         <div th:if="${topics.empty}" class="text-center text-muted mt-5">

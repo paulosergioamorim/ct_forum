@@ -1,6 +1,8 @@
 package br.ufes.ct_forum.services;
 
+import br.ufes.ct_forum.dtos.CommentDto;
 import br.ufes.ct_forum.dtos.CreateTopicDto;
+import br.ufes.ct_forum.dtos.TopicDetailDto;
 import br.ufes.ct_forum.dtos.TopicFeedDto;
 import br.ufes.ct_forum.exceptions.NotFoundException;
 import br.ufes.ct_forum.models.Topic;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * Serviço responsável por concentrar a lógica de negócio relacionada aos Tópicos.
@@ -80,7 +84,35 @@ public class TopicService {
             );
         });
     }
+    
+    @Transactional(readOnly = true)
+    public TopicDetailDto findDetailById(long id) {
+        Topic topic = topicRepository.findByIdWithAuthor(id)
+                .orElseThrow(() -> new NotFoundException("Tópico com id " + id + " não encontrado"));
 
+        List<CommentDto> comments = commentRepository.findByTopicIdWithAuthor(id).stream()
+                .map(comment -> new CommentDto(
+                        comment.getId(),
+                        comment.getAuthor().getName(),
+                        comment.getContent(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt(),
+                        comment.isEdited()
+                ))
+                .toList();
+
+        return new TopicDetailDto(
+                topic.getId(),
+                topic.getTitle(),
+                topic.getContent(),
+                topic.getAuthor().getName(),
+                topic.getCreatedAt(),
+                topic.getUpdatedAt(),
+                topic.isEdited(),
+                topic.getTags(),
+                comments
+        );
+    }
     /**
      * Realiza uma busca paginada por tópicos que contenham uma tag específica.
      *

@@ -4,7 +4,11 @@ import br.ufes.ct_forum.models.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repositório para operações de persistência da entidade {@link Comment}.
@@ -40,4 +44,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @return Um objeto {@link Page} contendo as respostas encontradas.
      */
     Page<Comment> findByParentId(long parentId, Pageable pageable);
+
+    @Query("select c from Comment c join fetch c.author where c.topic.id = :topicId order by c.createdAt asc")
+    List<Comment> findByTopicIdWithAuthor(@Param("topicId") long topicId);
 }
