@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * Repositório para operações de persistência específicas da entidade {@link Topic}.
  */
@@ -32,4 +34,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
      */
     @Query(value = "select * from posts where :tag = any(tags)", nativeQuery = true)
     Page<Topic> findByTag(@Param("tag") String tag, Pageable pageable);
+    
+    @Query("select t from Topic t join fetch t.author where t.id = :id")
+    Optional<Topic> findByIdWithAuthor(@Param("id") long id);
 }

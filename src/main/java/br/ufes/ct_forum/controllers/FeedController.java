@@ -1,6 +1,7 @@
 package br.ufes.ct_forum.controllers;
 
 import br.ufes.ct_forum.dtos.CreateTopicDto;
+import br.ufes.ct_forum.dtos.TopicDetailDto;
 import br.ufes.ct_forum.dtos.TopicFeedDto;
 import br.ufes.ct_forum.models.Topic;
 import br.ufes.ct_forum.models.User;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
@@ -34,6 +36,15 @@ public class FeedController {
 
         return "feed";
     }
+    
+    @GetMapping("/topic/{id}")
+    public String topicDetail(@PathVariable long id, Model model) {
+        TopicDetailDto topic = topicService.findDetailById(id);
+        model.addAttribute("topic", topic);
+
+        return "topic";
+    }
+
 
     @GetMapping("/create-topic")
     public String createTopicForm() {
