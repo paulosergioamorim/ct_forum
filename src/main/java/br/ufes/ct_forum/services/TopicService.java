@@ -1,5 +1,13 @@
 package br.ufes.ct_forum.services;
 
+import java.util.List;
+
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import br.ufes.ct_forum.dtos.CommentDto;
 import br.ufes.ct_forum.dtos.CreateTopicDto;
 import br.ufes.ct_forum.dtos.TopicDetailDto;
@@ -9,15 +17,6 @@ import br.ufes.ct_forum.models.Topic;
 import br.ufes.ct_forum.models.User;
 import br.ufes.ct_forum.repositories.CommentRepository;
 import br.ufes.ct_forum.repositories.TopicRepository;
-import org.jspecify.annotations.NonNull;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Serviço responsável por concentrar a lógica de negócio relacionada aos Tópicos.
@@ -69,6 +68,25 @@ public class TopicService {
     @Transactional(readOnly = true)
     public Page<TopicFeedDto> findAllForFeed(Pageable page) {
         Page<Topic> topics = topicRepository.findAll(page);
+
+        return topics.map(topic -> {
+            long commentCount = commentRepository.countByTopicId(topic.getId());
+
+            return new TopicFeedDto(
+                    topic.getId(),
+                    topic.getTitle(),
+                    topic.getAuthor().getName(),
+                    topic.getCreatedAt(),
+                    topic.getUpdatedAt(),
+                    topic.isEdited(),
+                    commentCount
+            );
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TopicFeedDto> findByAuthorForFeed(long authorId, Pageable page) {
+        Page<Topic> topics = topicRepository.findByAuthorId(authorId, page);
 
         return topics.map(topic -> {
             long commentCount = commentRepository.countByTopicId(topic.getId());
