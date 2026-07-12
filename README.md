@@ -41,7 +41,7 @@ spring.datasource.password=
 ```
 
 ##### Explicação
-- `spring.datasource.url`: URL para banco de dados Postgres. Seja
+- `spring.datasource.url`: URL JDBC para banco de dados Postgres. Seja
 em Docker, hospedado na nuvem, ou na máquina local.
 - `spring.datasource.username`: nome do usuário do banco de dados
 - `spring.datasource.password`: senha para o usuário do banco de dados
@@ -89,9 +89,12 @@ da API
 ### 5. Docker (via Docker Compose)
 
 Seção destinada a subir a infraestrutura com Docker Compose. Para utilizar o docker compose,
-seu .env deve conter também estas variáveis de ambiente (além das definidas previamente):
+tenha um `.env.docker` com as seguintes variáveis de ambiente:
 
 ```text
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
 POSTGRES_PASSWORD=
 POSTGRES_USER=
 POSTGRES_DB=
@@ -102,9 +105,10 @@ PGADMIN_DEFAULT_PASSWORD=
 `POSTGRES_PASSWORD`, `POSTGRES_USER`, `POSTGRES_DB` devem estar em consonância com as variáveis
 da aplicação Spring Boot definidas previamente. Certifique-se de ter o Docker e o Docker Compose
 instalados. `PGADMIN_DEFAULT_EMAIL` e `PGADMIN_DEFAULT_PASSWORD` serão o login no container do
-pgAdmin.
+pgAdmin. Esse `.env.docker` será utilizado pelo container da aplicação na infraestrutura no 
+Docker Compose.
 
-1. Primeiro, empacote o código-fonte (seção 3.1).
+1. Primeiro, empacote o código-fonte (seção 3).
 2. Em seguida, execute este comando para subir a infraestrutura:
 
 ```shell

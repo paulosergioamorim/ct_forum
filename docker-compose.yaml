@@ -24,7 +24,7 @@ services:
     restart: on-failure
     build: .
     volumes:
-      - .env:/app/.env
+      - .env.docker:/app/.env
     ports:
       - "8080:8080"
 
