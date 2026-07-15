@@ -3,6 +3,7 @@ package br.ufes.ct_forum.controllers;
 import br.ufes.ct_forum.config.SecurityConfig;
 import br.ufes.ct_forum.dtos.TopicFeedDto;
 import br.ufes.ct_forum.models.User;
+import br.ufes.ct_forum.services.CommentService;
 import br.ufes.ct_forum.services.TopicService;
 import br.ufes.ct_forum.services.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,9 @@ class FeedControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private CommentService commentService;
 
     @Autowired
     FeedControllerTest(MockMvc mockMvc) {
