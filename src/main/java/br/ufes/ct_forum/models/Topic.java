@@ -30,7 +30,7 @@ public class Topic extends Post {
     /**
      * O título do tópico.
      */
-    @Column(nullable = false)
+    @Column
     private String title;
 
     /**

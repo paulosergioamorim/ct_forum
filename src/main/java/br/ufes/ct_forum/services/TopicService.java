@@ -2,6 +2,7 @@ package br.ufes.ct_forum.services;
 
 import java.util.List;
 
+import br.ufes.ct_forum.models.Comment;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,15 +73,7 @@ public class TopicService {
         return topics.map(topic -> {
             long commentCount = commentRepository.countByTopicId(topic.getId());
 
-            return new TopicFeedDto(
-                    topic.getId(),
-                    topic.getTitle(),
-                    topic.getAuthor().getName(),
-                    topic.getCreatedAt(),
-                    topic.getUpdatedAt(),
-                    topic.isEdited(),
-                    commentCount
-            );
+            return new TopicFeedDto(topic.getId(), topic.getTitle(), topic.getAuthor().getName(), topic.getCreatedAt(), topic.getUpdatedAt(), topic.isEdited(), commentCount);
         });
     }
 
@@ -91,46 +84,34 @@ public class TopicService {
         return topics.map(topic -> {
             long commentCount = commentRepository.countByTopicId(topic.getId());
 
-            return new TopicFeedDto(
-                    topic.getId(),
-                    topic.getTitle(),
-                    topic.getAuthor().getName(),
-                    topic.getCreatedAt(),
-                    topic.getUpdatedAt(),
-                    topic.isEdited(),
-                    commentCount
-            );
+            return new TopicFeedDto(topic.getId(), topic.getTitle(), topic.getAuthor().getName(), topic.getCreatedAt(), topic.getUpdatedAt(), topic.isEdited(), commentCount);
         });
     }
-    
+
     @Transactional(readOnly = true)
     public TopicDetailDto findDetailById(long id) {
-        Topic topic = topicRepository.findByIdWithAuthor(id)
-                .orElseThrow(() -> new NotFoundException("Tópico com id " + id + " não encontrado"));
+        Topic topic = topicRepository.findByIdWithAuthor(id).orElseThrow(() -> new NotFoundException("Tópico com id " + id + " não encontrado"));
 
-        List<CommentDto> comments = commentRepository.findByTopicIdWithAuthor(id).stream()
-                .map(comment -> new CommentDto(
-                        comment.getId(),
-                        comment.getAuthor().getName(),
-                        comment.getContent(),
-                        comment.getCreatedAt(),
-                        comment.getUpdatedAt(),
-                        comment.isEdited()
-                ))
-                .toList();
+        // Busca todos os comentários vinculados ao tópico
+        List<Comment> allComments = commentRepository.findByTopicIdWithAuthor(id);
 
-        return new TopicDetailDto(
-                topic.getId(),
-                topic.getTitle(),
-                topic.getContent(),
-                topic.getAuthor().getName(),
-                topic.getCreatedAt(),
-                topic.getUpdatedAt(),
-                topic.isEdited(),
-                topic.getTags(),
-                comments
+        // Filtra apenas os comentários raiz e constrói a árvore recursivamente
+        List<CommentDto> commentsTree = allComments.stream().filter(Comment::isRootComment).map(rootComment -> buildCommentTree(rootComment, allComments)).toList();
+
+        return new TopicDetailDto(topic.getId(), topic.getTitle(), topic.getContent(), topic.getAuthor().getName(), topic.getCreatedAt(), topic.getUpdatedAt(), topic.isEdited(), topic.getTags(), commentsTree);
+    }
+
+    /**
+     * Método auxiliar recursivo para mapear um comentário e encontrar suas respectivas respostas.
+     */
+    private CommentDto buildCommentTree(Comment currentComment, List<Comment> allComments) {
+        // Encontra todos os comentários cujo pai é o comentário atual e aplica a recursão
+        List<CommentDto> replies = allComments.stream().filter(c -> c.getParent() != null && c.getParent().getId() == currentComment.getId()).map(childComment -> buildCommentTree(childComment, allComments)).toList();
+
+        return new CommentDto(currentComment.getId(), currentComment.getAuthor().getName(), currentComment.getContent(), currentComment.getCreatedAt(), currentComment.getUpdatedAt(), currentComment.isEdited(), replies // Injeta os filhos mapeados
         );
     }
+
     /**
      * Realiza uma busca paginada por tópicos que contenham uma tag específica.
      *
