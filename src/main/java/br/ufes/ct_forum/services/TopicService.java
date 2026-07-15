@@ -1,5 +1,7 @@
 package br.ufes.ct_forum.services;
 
+import static org.mockito.ArgumentMatchers.isNull;
+
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -13,9 +15,11 @@ import br.ufes.ct_forum.dtos.CreateTopicDto;
 import br.ufes.ct_forum.dtos.TopicDetailDto;
 import br.ufes.ct_forum.dtos.TopicFeedDto;
 import br.ufes.ct_forum.exceptions.NotFoundException;
+import br.ufes.ct_forum.models.Rating;
 import br.ufes.ct_forum.models.Topic;
 import br.ufes.ct_forum.models.User;
 import br.ufes.ct_forum.repositories.CommentRepository;
+import br.ufes.ct_forum.repositories.RatingRepository;
 import br.ufes.ct_forum.repositories.TopicRepository;
 
 /**
@@ -26,6 +30,8 @@ public class TopicService {
     private final TopicRepository topicRepository;
     private final UserService userService;
     private final CommentRepository commentRepository;
+    private final RatingRepository ratingRepository;
+    private final RatingService ratingService;
 
     /**
      * Construtor da classe com Injeção de Dependências.
@@ -33,10 +39,12 @@ public class TopicService {
      * @param topicRepository Repositório para operações de I/O na tabela de tópicos.
      * @param userService     Serviço de domínio de usuários para recuperação de dados de autoria.
      */
-    public TopicService(TopicRepository topicRepository, UserService userService, CommentRepository commentRepository) {
+    public TopicService(TopicRepository topicRepository, UserService userService, CommentRepository commentRepository, RatingRepository ratingRepository, RatingService ratingService) {
         this.topicRepository = topicRepository;
         this.userService = userService;
         this.commentRepository = commentRepository;
+        this.ratingRepository = ratingRepository;
+        this.ratingService = ratingService;
     }
 
     /**
@@ -66,30 +74,34 @@ public class TopicService {
      * garantindo a resolução segura de proxies LAZY e agragando contagens.
      */
     @Transactional(readOnly = true)
-    public Page<TopicFeedDto> findAllForFeed(Pageable page) {
+    public Page<TopicFeedDto> findAllForFeed(Pageable page, Long currentUserId) {
         Page<Topic> topics = topicRepository.findAll(page);
 
         return topics.map(topic -> {
             long commentCount = commentRepository.countByTopicId(topic.getId());
+            long positives = ratingService.countPositiveRatings(topic.getId());
+            long negatives = ratingService.countNegativeRatings(topic.getId());
+            Boolean userVote = currentUserId == null ? null :
+                    ratingRepository.findByPostIdAndUserId(topic.getId(), currentUserId)
+                            .map(Rating::isPositive).orElse(null);
 
-            return new TopicFeedDto(
-                    topic.getId(),
-                    topic.getTitle(),
-                    topic.getAuthor().getName(),
-                    topic.getCreatedAt(),
-                    topic.getUpdatedAt(),
-                    topic.isEdited(),
-                    commentCount
-            );
+            return new TopicFeedDto(topic.getId(), topic.getTitle(), topic.getAuthor().getName(),
+                    topic.getCreatedAt(), topic.getUpdatedAt(), topic.isEdited(),
+                    commentCount, positives, negatives, userVote);
         });
     }
 
     @Transactional(readOnly = true)
-    public Page<TopicFeedDto> findByAuthorForFeed(long authorId, Pageable page) {
+    public Page<TopicFeedDto> findByAuthorForFeed(long authorId, Pageable page, Long currentUserId) {
         Page<Topic> topics = topicRepository.findByAuthorId(authorId, page);
 
         return topics.map(topic -> {
             long commentCount = commentRepository.countByTopicId(topic.getId());
+            long positives = ratingService.countPositiveRatings(topic.getId());
+            long negatives = ratingService.countNegativeRatings(topic.getId());
+            Boolean userVote = currentUserId == null ? null :
+                    ratingRepository.findByPostIdAndUserId(topic.getId(), currentUserId)
+                            .map(Rating::isPositive).orElse(null);
 
             return new TopicFeedDto(
                     topic.getId(),
@@ -98,25 +110,46 @@ public class TopicService {
                     topic.getCreatedAt(),
                     topic.getUpdatedAt(),
                     topic.isEdited(),
-                    commentCount
+                    commentCount,
+                    positives,
+                    negatives,
+                    userVote
             );
         });
     }
     
     @Transactional(readOnly = true)
-    public TopicDetailDto findDetailById(long id) {
+    public TopicDetailDto findDetailById(long id, Long currentUserId) {
         Topic topic = topicRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new NotFoundException("Tópico com id " + id + " não encontrado"));
+        
+        // 1. Buscando ratings do tópico
+        long positives = ratingService.countPositiveRatings(topic.getId());
+        long negatives = ratingService.countNegativeRatings(topic.getId());
+        Boolean userVote = currentUserId == null ? null :
+                ratingRepository.findByPostIdAndUserId(topic.getId(), currentUserId)
+                        .map(Rating::isPositive).orElse(null);
 
         List<CommentDto> comments = commentRepository.findByTopicIdWithAuthor(id).stream()
-                .map(comment -> new CommentDto(
-                        comment.getId(),
-                        comment.getAuthor().getName(),
-                        comment.getContent(),
-                        comment.getCreatedAt(),
-                        comment.getUpdatedAt(),
-                        comment.isEdited()
-                ))
+                .map(comment -> {
+                    long commentPositives = ratingService.countPositiveRatings(comment.getId());
+                    long commentNegatives = ratingService.countNegativeRatings(comment.getId());
+                    Boolean commentUserVote = currentUserId == null ? null :
+                            ratingRepository.findByPostIdAndUserId(comment.getId(), currentUserId)
+                                    .map(Rating::isPositive).orElse(null);
+
+                    return new CommentDto(
+                            comment.getId(),
+                            comment.getAuthor().getName(),
+                            comment.getContent(),
+                            comment.getCreatedAt(),
+                            comment.getUpdatedAt(),
+                            comment.isEdited(),
+                            commentPositives,
+                            commentNegatives,
+                            commentUserVote
+                    );
+                })
                 .toList();
 
         return new TopicDetailDto(
@@ -128,7 +161,10 @@ public class TopicService {
                 topic.getUpdatedAt(),
                 topic.isEdited(),
                 topic.getTags(),
-                comments
+                comments,
+                positives, 
+                negatives, 
+                userVote   
         );
     }
     /**

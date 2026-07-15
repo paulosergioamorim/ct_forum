@@ -29,17 +29,24 @@ public class ProfileController {
     @GetMapping("/profile")
     public String ownProfile(@PageableDefault Pageable pageable, Principal principal, Model model) {
         User user = userService.findByEmail(principal.getName());
-        return renderProfile(user, "/profile", pageable, model);
+        return renderProfile(user, user.getId(), "/profile", pageable, model);
     }
 
     @GetMapping("/profile/{id}")
-    public String userProfile(@PathVariable long id, @PageableDefault Pageable pageable, Model model) {
-        User user = userService.findById(id);
-        return renderProfile(user, "/profile/" + id, pageable, model);
+    public String userProfile(@PathVariable long id, @PageableDefault Pageable pageable, Principal principal, Model model) {
+        User profileOwner = userService.findById(id); // Usuário dono do perfil acessado
+        
+        // Identifica quem está logado visitando a página
+        Long currentUserId = null;
+        if (principal != null) {
+            currentUserId = userService.findByEmail(principal.getName()).getId();
+        }
+        
+        return renderProfile(profileOwner, currentUserId, "/profile/" + id, pageable, model);
     }
 
-    private String renderProfile(User user, String baseUrl, Pageable pageable, Model model) {
-        Page<TopicFeedDto> topics = topicService.findByAuthorForFeed(user.getId(), pageable);
+    private String renderProfile(User user, Long currentUserId, String baseUrl, Pageable pageable, Model model) {
+        Page<TopicFeedDto> topics = topicService.findByAuthorForFeed(user.getId(), pageable, currentUserId);
 
         model.addAttribute("user", UserDto.of(user));
         model.addAttribute("topics", topics);

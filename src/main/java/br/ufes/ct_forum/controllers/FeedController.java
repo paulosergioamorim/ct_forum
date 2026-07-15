@@ -30,16 +30,18 @@ public class FeedController {
     }
 
     @GetMapping("/feed")
-    public String feed(@PageableDefault Pageable pageable, Model model) {
-        Page<TopicFeedDto> topics = topicService.findAllForFeed(pageable);
+    public String feed(@PageableDefault Pageable pageable, Principal principal, Model model) {
+        Long userId = principal != null ? userService.findByEmail(principal.getName()).getId() : null;
+        Page<TopicFeedDto> topics = topicService.findAllForFeed(pageable, userId);
         model.addAttribute("topics", topics);
 
         return "feed";
     }
     
     @GetMapping("/topic/{id}")
-    public String topicDetail(@PathVariable long id, Model model) {
-        TopicDetailDto topic = topicService.findDetailById(id);
+    public String topicDetail(@PathVariable long id, Principal principal, Model model) {
+        Long userId = principal != null ? userService.findByEmail(principal.getName()).getId() : null;
+        TopicDetailDto topic = topicService.findDetailById(id, userId);
         model.addAttribute("topic", topic);
 
         return "topic";

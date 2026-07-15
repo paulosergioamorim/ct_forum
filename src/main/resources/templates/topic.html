@@ -72,6 +72,11 @@
                     <span th:each="tag : ${topic.tags()}" class="badge rounded-pill bg-primary-subtle text-primary fw-semibold px-3 py-2" th:text="'#' + ${tag}">#tag</span>
                 </div>
 
+                <!-- Curtidas -->
+                <div class="mt-4 border-top pt-3">
+                    <div th:replace="~{fragments :: ratingButtons(post=${topic})}"></div>
+                </div>
+
             </div>
         </div>
 

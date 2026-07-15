@@ -9,6 +9,9 @@ public record CommentDto(
         String content,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        boolean isEdited
+        boolean isEdited,
+        long positiveCount,
+        long negativeCount,
+        Boolean userVote
 ) {
 }

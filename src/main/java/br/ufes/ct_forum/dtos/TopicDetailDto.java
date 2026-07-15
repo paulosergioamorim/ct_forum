@@ -13,6 +13,8 @@ public record TopicDetailDto(
         LocalDateTime updatedAt,
         boolean isEdited,
         String[] tags,
-        List<CommentDto> comments
-) {
-}
+        List<CommentDto> comments,
+        long positiveCount,
+        long negativeCount,
+        Boolean userVote
+) {}

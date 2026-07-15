@@ -12,6 +12,9 @@ public record TopicFeedDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         boolean isEdited,
-        long commentCount
+        long commentCount,
+        long positiveCount,
+        long negativeCount,
+        Boolean userVote
 ) {
 }
