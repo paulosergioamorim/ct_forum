@@ -2,6 +2,8 @@ package br.ufes.ct_forum.controllers;
 
 import br.ufes.ct_forum.config.SecurityConfig;
 import br.ufes.ct_forum.dtos.TopicFeedDto;
+import br.ufes.ct_forum.models.User;
+import br.ufes.ct_forum.services.CommentService;
 import br.ufes.ct_forum.services.TopicService;
 import br.ufes.ct_forum.services.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,6 +37,9 @@ class FeedControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private CommentService commentService;
 
     @Autowired
     FeedControllerTest(MockMvc mockMvc) {
@@ -51,14 +57,24 @@ class FeedControllerTest {
     @Test
     @DisplayName("Deve permitir acesso ao /feed para usuário autenticado e injetar a lista de tópicos no Model")
     void accessFeed_Authenticated_ShouldReturnFeedView() throws Exception {
+        String userEmail = "aluno@ufes.br";
+        Long expectedUserId = 1L;
+        
+        User mockUser = Mockito.mock(User.class);
+        Mockito.when(mockUser.getId()).thenReturn(expectedUserId);
+        Mockito.when(userService.findByEmail(userEmail)).thenReturn(mockUser);
+        
         Page<TopicFeedDto> mockPage = new PageImpl<>(Collections.emptyList());
-        Mockito.when(topicService.findAllForFeed(any(Pageable.class))).thenReturn(mockPage);
+        Mockito.when(topicService.findAllForFeed(any(Pageable.class), eq(expectedUserId)))
+               .thenReturn(mockPage);
 
-        mockMvc.perform(get("/feed").with(user("aluno@ufes.br").roles("USER")))
+        mockMvc.perform(get("/feed").with(user(userEmail).roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("feed"))
                 .andExpect(model().attributeExists("topics"));
 
-        Mockito.verify(topicService).findAllForFeed(any(Pageable.class));
+        Mockito.verify(userService).findByEmail(userEmail);
+        Mockito.verify(topicService).findAllForFeed(any(Pageable.class), eq(expectedUserId));
+        Mockito.verifyNoMoreInteractions(userService, topicService);
     }
 }
