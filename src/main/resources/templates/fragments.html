@@ -114,6 +114,68 @@
         
     </form>
 </div>
+<th:block th:fragment="commentTree(commentList)">
+    <th:block th:each="comment : ${commentList}">
+
+        <div class="card border-0 shadow-sm rounded-4 mb-3 w-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center text-muted flex-wrap gap-2" style="font-size: 0.85rem;">
+                    <span class="fw-semibold text-dark">
+                        <i class="bi bi-person-circle"></i> <span th:text="${comment.authorName()}">Autor</span>
+                    </span>
+                    <i class="bi bi-circle-fill" style="font-size: 0.3rem; color: #ccc;"></i>
+                    <span th:text="${#temporals.format(comment.createdAt(), 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+
+                    <th:block th:if="${comment.isEdited()}">
+                        <i class="bi bi-circle-fill" style="font-size: 0.3rem; color: #ccc;"></i>
+                        <span class="text-secondary fst-italic" th:text="${'(Editado em ' + #temporals.format(comment.updatedAt(), 'dd/MM/yyyy HH:mm') + ')'}">(Editado)</span>
+                    </th:block>
+                </div>
+
+                <p class="topic-content text-dark mt-2 mb-2" th:text="${comment.content()}">
+                    Conteúdo do comentário.
+                </p>
+
+                <div class="mt-1">
+                    <button class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-inline-flex align-items-center gap-1"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            th:data-bs-target="'#replyCollapse-' + ${comment.id()}"
+                            aria-expanded="false">
+                        <i class="bi bi-reply-fill"></i> Responder
+                    </button>
+
+                    <div class="collapse mt-3" th:id="'replyCollapse-' + ${comment.id()}">
+                        <div th:if="${usuarioAutenticado}">
+                            <form th:action="@{/topic/{id}/comment(id=${topic.id()})}" method="post">
+                                <input type="hidden" name="parentId" th:value="${comment.id()}" />
+
+                                <div class="d-flex flex-column gap-2">
+                                    <textarea name="content" class="form-control form-control-sm bg-light border-0" rows="2" placeholder="Escreva sua resposta..." required></textarea>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold shadow-sm">
+                                            Responder
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div th:if="${!usuarioAutenticado}" class="alert alert-secondary border-0 p-2 text-center mb-0" style="font-size: 0.85rem;">
+                            Para responder, <a th:href="@{/login}" class="fw-bold text-decoration-none">faça o login</a>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${comment.replies() != null and !comment.replies().isEmpty()}"
+             class="ms-4 ps-3 border-start border-3 border-secondary-subtle">
+            <th:block th:replace="~{fragments :: commentTree(${comment.replies()})}"></th:block>
+        </div>
+
+    </th:block>
+</th:block>
 
 </body>
 </html>

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 
 import java.util.List;
 
+import br.ufes.ct_forum.models.Comment;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -117,39 +118,22 @@ public class TopicService {
             );
         });
     }
-    
+
     @Transactional(readOnly = true)
     public TopicDetailDto findDetailById(long id, Long currentUserId) {
         Topic topic = topicRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new NotFoundException("Tópico com id " + id + " não encontrado"));
         
-        // 1. Buscando ratings do tópico
         long positives = ratingService.countPositiveRatings(topic.getId());
         long negatives = ratingService.countNegativeRatings(topic.getId());
         Boolean userVote = currentUserId == null ? null :
                 ratingRepository.findByPostIdAndUserId(topic.getId(), currentUserId)
                         .map(Rating::isPositive).orElse(null);
 
-        List<CommentDto> comments = commentRepository.findByTopicIdWithAuthor(id).stream()
-                .map(comment -> {
-                    long commentPositives = ratingService.countPositiveRatings(comment.getId());
-                    long commentNegatives = ratingService.countNegativeRatings(comment.getId());
-                    Boolean commentUserVote = currentUserId == null ? null :
-                            ratingRepository.findByPostIdAndUserId(comment.getId(), currentUserId)
-                                    .map(Rating::isPositive).orElse(null);
-
-                    return new CommentDto(
-                            comment.getId(),
-                            comment.getAuthor().getName(),
-                            comment.getContent(),
-                            comment.getCreatedAt(),
-                            comment.getUpdatedAt(),
-                            comment.isEdited(),
-                            commentPositives,
-                            commentNegatives,
-                            commentUserVote
-                    );
-                })
+        List<Comment> allComments = commentRepository.findByTopicIdWithAuthor(id);
+        List<CommentDto> commentsTree = allComments.stream()
+                .filter(Comment::isRootComment)
+                .map(rootComment -> buildCommentTree(rootComment, allComments, currentUserId))
                 .toList();
 
         return new TopicDetailDto(
@@ -161,12 +145,44 @@ public class TopicService {
                 topic.getUpdatedAt(),
                 topic.isEdited(),
                 topic.getTags(),
-                comments,
+                commentsTree,
                 positives, 
                 negatives, 
                 userVote   
+        ); 
+    }
+
+    /**
+     * Método auxiliar recursivo para mapear um comentário e encontrar suas respectivas respostas.
+     */
+    private CommentDto buildCommentTree(Comment currentComment, List<Comment> allComments, Long currentUserId) {
+        // Encontra todos os comentários cujo pai é o comentário atual e aplica a recursão
+        List<CommentDto> replies = allComments.stream()
+                .filter(c -> c.getParent() != null && c.getParent().getId() == currentComment.getId())
+                .map(childComment -> buildCommentTree(childComment, allComments, currentUserId))
+                .toList();
+
+        // Calculando os ratings
+        long commentPositives = ratingService.countPositiveRatings(currentComment.getId());
+        long commentNegatives = ratingService.countNegativeRatings(currentComment.getId());
+        Boolean commentUserVote = currentUserId == null ? null :
+                ratingRepository.findByPostIdAndUserId(currentComment.getId(), currentUserId)
+                        .map(Rating::isPositive).orElse(null);
+
+        return new CommentDto(
+                currentComment.getId(), 
+                currentComment.getAuthor().getName(), 
+                currentComment.getContent(), 
+                currentComment.getCreatedAt(), 
+                currentComment.getUpdatedAt(), 
+                currentComment.isEdited(), 
+                commentPositives,      // Nova feature: Likes do comentário
+                commentNegatives,      // Nova feature: Dislikes do comentário
+                commentUserVote,       // Nova feature: Status do voto do usuário atual
+                replies                // Feature do colega: Filhos mapeados (árvore)
         );
     }
+
     /**
      * Realiza uma busca paginada por tópicos que contenham uma tag específica.
      *

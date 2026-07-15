@@ -1,6 +1,7 @@
 package br.ufes.ct_forum.dtos;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 public record CommentDto(
@@ -12,6 +13,7 @@ public record CommentDto(
         boolean isEdited,
         long positiveCount,
         long negativeCount,
-        Boolean userVote
+        Boolean userVote,
+        List<CommentDto> replies
 ) {
 }
